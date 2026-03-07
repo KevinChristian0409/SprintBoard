@@ -1,17 +1,29 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Folder, Users, ArrowRight, Trash2, Edit2, X, Check } from 'lucide-react';
-import api from '../services/api';
-import type { Project } from '../types';
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus, Folder, Users, ArrowRight, Trash2, X } from "lucide-react";
+import api from "../services/api";
+import type { Project } from "../types";
 
 const Projects = () => {
-  const navigate = useNavigate();
+  useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newProject, setNewProject] = useState({ name: '', description: '', color: '#3B82F6' });
+  const [newProject, setNewProject] = useState({
+    name: "",
+    description: "",
+    color: "#3B82F6",
+  });
 
-  const colors = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
+  const colors = [
+    "#3B82F6",
+    "#EF4444",
+    "#10B981",
+    "#F59E0B",
+    "#8B5CF6",
+    "#EC4899",
+    "#6366F1",
+  ];
 
   useEffect(() => {
     fetchProjects();
@@ -19,10 +31,10 @@ const Projects = () => {
 
   const fetchProjects = async () => {
     try {
-      const { data } = await api.get('/projects');
+      const { data } = await api.get("/api/projects");
       setProjects(data.data);
     } catch (error) {
-      console.error('Failed to fetch projects:', error);
+      console.error("Failed to fetch projects:", error);
     } finally {
       setIsLoading(false);
     }
@@ -31,22 +43,23 @@ const Projects = () => {
   const createProject = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/projects', newProject);
+      const { data } = await api.post("/api/projects", newProject);
       setProjects([...projects, data.data]);
       setShowCreateModal(false);
-      setNewProject({ name: '', description: '', color: '#3B82F6' });
+      setNewProject({ name: "", description: "", color: "#3B82F6" });
     } catch (error) {
-      console.error('Failed to create project:', error);
+      console.error("Failed to create project:", error);
     }
   };
 
   const deleteProject = async (id: string) => {
-    if (!confirm('Are you sure? This will delete all tasks in this project.')) return;
+    if (!confirm("Are you sure? This will delete all tasks in this project."))
+      return;
     try {
-      await api.delete(`/projects/${id}`);
-      setProjects(projects.filter(p => p._id !== id));
+      await api.delete(`/api/projects/${id}`);
+      setProjects(projects.filter((p) => p._id !== id));
     } catch (error) {
-      console.error('Failed to delete project:', error);
+      console.error("Failed to delete project:", error);
     }
   };
 
@@ -70,8 +83,12 @@ const Projects = () => {
             <span className="text-xl font-bold text-gray-900">TaskFlow</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
-            <Link to="/projects" className="text-blue-600 font-medium">Projects</Link>
+            <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
+              Dashboard
+            </Link>
+            <Link to="/projects" className="text-blue-600 font-medium">
+              Projects
+            </Link>
           </div>
         </div>
       </nav>
@@ -91,8 +108,12 @@ const Projects = () => {
         {projects.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
             <Folder className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-            <p className="text-gray-500 mb-4">Create your first project to get started</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No projects yet
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Create your first project to get started
+            </p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="text-blue-600 hover:text-blue-700 font-medium"
@@ -122,9 +143,11 @@ const Projects = () => {
                   </div>
                 </div>
 
-                <h3 className="font-semibold text-lg text-gray-900 mb-1">{project.name}</h3>
+                <h3 className="font-semibold text-lg text-gray-900 mb-1">
+                  {project.name}
+                </h3>
                 <p className="text-gray-500 text-sm mb-4 line-clamp-2">
-                  {project.description || 'No description'}
+                  {project.description || "No description"}
                 </p>
 
                 <div className="flex items-center justify-between">
@@ -151,7 +174,9 @@ const Projects = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Create Project</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                Create Project
+              </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -162,11 +187,15 @@ const Projects = () => {
 
             <form onSubmit={createProject} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Project Name
+                </label>
                 <input
                   type="text"
                   value={newProject.name}
-                  onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewProject({ ...newProject, name: e.target.value })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   placeholder="My Project"
                   required
@@ -174,10 +203,17 @@ const Projects = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
                 <textarea
                   value={newProject.description}
-                  onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewProject({
+                      ...newProject,
+                      description: e.target.value,
+                    })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                   rows={3}
                   placeholder="Optional description"
@@ -185,14 +221,16 @@ const Projects = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Color
+                </label>
                 <div className="flex gap-2 flex-wrap">
                   {colors.map((color) => (
                     <button
                       key={color}
                       type="button"
                       onClick={() => setNewProject({ ...newProject, color })}
-                      className={`w-8 h-8 rounded-lg transition ${newProject.color === color ? 'ring-2 ring-offset-2 ring-gray-400' : ''}`}
+                      className={`w-8 h-8 rounded-lg transition ${newProject.color === color ? "ring-2 ring-offset-2 ring-gray-400" : ""}`}
                       style={{ backgroundColor: color }}
                     />
                   ))}

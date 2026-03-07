@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import type { DragEndEvent } from '@dnd-kit/core';
-import type { DragStartEvent } from '@dnd-kit/core';
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import type { DragEndEvent } from "@dnd-kit/core";
+import type { DragStartEvent } from "@dnd-kit/core";
 import {
   DndContext,
   DragOverlay,
@@ -9,20 +9,31 @@ import {
   useSensor,
   useSensors,
   closestCorners,
-  useDroppable
-} from '@dnd-kit/core';
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { ArrowLeft, Plus, Trash2, X, Calendar, User as UserIcon, GripVertical } from 'lucide-react';
-import api from '../services/api';
-import type { Project, Task, TaskStatus,TaskPriority  } from '../types';
+  useDroppable,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  ArrowLeft,
+  Plus,
+  X,
+  Calendar,
+  User as UserIcon,
+  GripVertical,
+} from "lucide-react";
+import api from "../services/api";
+import type { Project, Task, TaskStatus, TaskPriority } from "../types";
 
 const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
-  { id: 'backlog', title: 'Backlog', color: 'bg-gray-500' },
-  { id: 'in-progress', title: 'In Progress', color: 'bg-blue-500' },
-  { id: 'review', title: 'Review', color: 'bg-purple-500' },
-  { id: 'done', title: 'Done', color: 'bg-green-500' },
+  { id: "backlog", title: "Backlog", color: "bg-gray-500" },
+  { id: "in-progress", title: "In Progress", color: "bg-blue-500" },
+  { id: "review", title: "Review", color: "bg-purple-500" },
+  { id: "done", title: "Done", color: "bg-green-500" },
 ];
 
 // Task Card Component
@@ -43,10 +54,14 @@ const TaskCard = ({ task, isOverlay }: { task: Task; isOverlay?: boolean }) => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-700';
-      case 'medium': return 'bg-yellow-100 text-yellow-700';
-      case 'low': return 'bg-green-100 text-green-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case "high":
+        return "bg-red-100 text-red-700";
+      case "medium":
+        return "bg-yellow-100 text-yellow-700";
+      case "low":
+        return "bg-green-100 text-green-700";
+      default:
+        return "bg-gray-100 text-gray-700";
     }
   };
 
@@ -55,8 +70,8 @@ const TaskCard = ({ task, isOverlay }: { task: Task; isOverlay?: boolean }) => {
       ref={setNodeRef}
       style={style}
       className={`bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition group ${
-        isDragging || isOverlay ? 'opacity-50 rotate-2 shadow-xl' : ''
-      } ${isOverlay ? 'opacity-100 rotate-0 cursor-grabbing' : 'cursor-pointer'}`}
+        isDragging || isOverlay ? "opacity-50 rotate-2 shadow-xl" : ""
+      } ${isOverlay ? "opacity-100 rotate-0 cursor-grabbing" : "cursor-pointer"}`}
       {...attributes}
     >
       <div className="flex items-start justify-between mb-2">
@@ -67,17 +82,23 @@ const TaskCard = ({ task, isOverlay }: { task: Task; isOverlay?: boolean }) => {
           >
             <GripVertical className="w-4 h-4 text-gray-400" />
           </button>
-          <h4 className="font-medium text-gray-900 line-clamp-2">{task.title}</h4>
+          <h4 className="font-medium text-gray-900 line-clamp-2">
+            {task.title}
+          </h4>
         </div>
       </div>
 
       {task.description && (
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{task.description}</p>
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          {task.description}
+        </p>
       )}
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className={`text-xs px-2 py-1 rounded-full font-medium ${getPriorityColor(task.priority)}`}>
+          <span
+            className={`text-xs px-2 py-1 rounded-full font-medium ${getPriorityColor(task.priority)}`}
+          >
             {task.priority}
           </span>
           {task.dueDate && (
@@ -101,14 +122,24 @@ const TaskCard = ({ task, isOverlay }: { task: Task; isOverlay?: boolean }) => {
 };
 
 // Column Component
-const Column = ({ id, title, color, tasks }: { id: string; title: string; color: string; tasks: Task[] }) => {
+const Column = ({
+  id,
+  title,
+  color,
+  tasks,
+}: {
+  id: string;
+  title: string;
+  color: string;
+  tasks: Task[];
+}) => {
   const { setNodeRef, isOver } = useDroppable({ id });
 
   return (
     <div
       ref={setNodeRef}
       className={`flex flex-col w-80 min-w-[320px] bg-gray-50 rounded-xl transition-colors ${
-        isOver ? 'bg-gray-100 ring-2 ring-blue-400 ring-inset' : ''
+        isOver ? "bg-gray-100 ring-2 ring-blue-400 ring-inset" : ""
       }`}
     >
       <div className="p-4 flex items-center justify-between">
@@ -122,7 +153,10 @@ const Column = ({ id, title, color, tasks }: { id: string; title: string; color:
       </div>
 
       <div className="flex-1 p-3 space-y-3 min-h-[200px]">
-        <SortableContext items={tasks.map((t) => t._id)} strategy={verticalListSortingStrategy}>
+        <SortableContext
+          items={tasks.map((t) => t._id)}
+          strategy={verticalListSortingStrategy}
+        >
           {tasks.map((task) => (
             <TaskCard key={task._id} task={task} />
           ))}
@@ -147,14 +181,14 @@ const ProjectBoard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
-    priority: 'medium' as TaskPriority,
-    status: 'backlog' as TaskStatus
+    title: "",
+    description: "",
+    priority: "medium" as TaskPriority,
+    status: "backlog" as TaskStatus,
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
   useEffect(() => {
@@ -164,14 +198,14 @@ const ProjectBoard = () => {
   const fetchData = async () => {
     try {
       const [projectRes, tasksRes] = await Promise.all([
-        api.get(`/projects/${id}`),
-        api.get(`/tasks?projectId=${id}`)
+        api.get(`/api/projects/${id}`),
+        api.get(`/api/tasks?projectId=${id}`),
       ]);
       setProject(projectRes.data.data);
       setTasks(tasksRes.data.data);
     } catch (error) {
-      console.error('Failed to fetch data:', error);
-      navigate('/projects');
+      console.error("Failed to fetch data:", error);
+      navigate("/projects");
     } finally {
       setIsLoading(false);
     }
@@ -180,15 +214,20 @@ const ProjectBoard = () => {
   const createTask = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/tasks', {
+      const { data } = await api.post("/api/tasks", {
         ...newTask,
-        project: id
+        project: id,
       });
       setTasks([...tasks, data.data]);
       setShowCreateModal(false);
-      setNewTask({ title: '', description: '', priority: 'medium', status: 'backlog' });
+      setNewTask({
+        title: "",
+        description: "",
+        priority: "medium",
+        status: "backlog",
+      });
     } catch (error) {
-      console.error('Failed to create task:', error);
+      console.error("Failed to create task:", error);
     }
   };
 
@@ -235,10 +274,12 @@ const ProjectBoard = () => {
 
   const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
     try {
-      await api.patch(`/tasks/${taskId}/status`, { status });
-      setTasks((prev) => prev.map((t) => (t._id === taskId ? { ...t, status } : t)));
+      await api.patch(`/api/tasks/${taskId}/status`, { status });
+      setTasks((prev) =>
+        prev.map((t) => (t._id === taskId ? { ...t, status } : t)),
+      );
     } catch (error) {
-      console.error('Failed to update task:', error);
+      console.error("Failed to update task:", error);
     }
   };
 
@@ -256,7 +297,10 @@ const ProjectBoard = () => {
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/projects" className="p-2 hover:bg-gray-100 rounded-lg transition">
+            <Link
+              to="/projects"
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div className="flex items-center gap-3">
@@ -266,7 +310,9 @@ const ProjectBoard = () => {
               />
               <div>
                 <h1 className="font-semibold text-gray-900">{project.name}</h1>
-                <p className="text-xs text-gray-500">{project.members.length} members</p>
+                <p className="text-xs text-gray-500">
+                  {project.members.length} members
+                </p>
               </div>
             </div>
           </div>
@@ -323,11 +369,15 @@ const ProjectBoard = () => {
 
             <form onSubmit={createTask} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
+                </label>
                 <input
                   type="text"
                   value={newTask.title}
-                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  onChange={(e) =>
+                    setNewTask({ ...newTask, title: e.target.value })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   placeholder="Task title"
                   required
@@ -335,10 +385,14 @@ const ProjectBoard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
                 <textarea
                   value={newTask.description}
-                  onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewTask({ ...newTask, description: e.target.value })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
                   rows={3}
                   placeholder="Optional description"
@@ -347,10 +401,17 @@ const ProjectBoard = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Priority
+                  </label>
                   <select
                     value={newTask.priority}
-                    onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as TaskPriority })}
+                    onChange={(e) =>
+                      setNewTask({
+                        ...newTask,
+                        priority: e.target.value as TaskPriority,
+                      })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
                     <option value="low">Low</option>
@@ -360,10 +421,17 @@ const ProjectBoard = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
                   <select
                     value={newTask.status}
-                    onChange={(e) => setNewTask({ ...newTask, status: e.target.value as TaskStatus })}
+                    onChange={(e) =>
+                      setNewTask({
+                        ...newTask,
+                        status: e.target.value as TaskStatus,
+                      })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   >
                     <option value="backlog">Backlog</option>
