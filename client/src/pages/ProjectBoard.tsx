@@ -180,10 +180,6 @@ const Column = ({
               key={task._id}
               task={task}
               onClick={() => {
-                console.log(
-                  "Navigating to:",
-                  `/projects/${projectId}/tasks/${task._id}`,
-                );
                 navigate(`/projects/${projectId}/tasks/${task._id}`);
               }}
             />
@@ -215,6 +211,7 @@ const ProjectBoard = () => {
     priority: "medium" as TaskPriority,
     status: "backlog" as TaskStatus,
     assignedTo: "",
+    dueDate: "",
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<User[]>([]);
@@ -250,15 +247,63 @@ const ProjectBoard = () => {
     navigate("/login");
   };
 
-  const currentUserId = JSON.parse(localStorage.getItem("user") || "{}")._id;
+  // FIX: Properly get current user ID from localStorage
+  const getCurrentUserId = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return null;
 
-  const isProjectManager = project?.createdBy._id === currentUserId;
+      const userData = JSON.parse(userStr);
+
+      if (userData._id) return userData._id;
+      if (userData.id) return userData.id;
+      if (userData.user?._id) return userData.user._id;
+      if (userData.user?.id) return userData.user.id;
+      if (userData.data?._id) return userData.data._id;
+      if (userData.data?.id) return userData.data.id;
+      if (userData.data?.user?._id) return userData.data.user._id;
+
+      return null;
+    } catch (error) {
+      console.error("Error parsing user from localStorage:", error);
+      return null;
+    }
+  };
+
+  const currentUserId = getCurrentUserId();
+
+  // Also try to get from token if available
+  const getUserFromToken = () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return null;
+
+      // Decode JWT payload (middle part)
+      const base64Payload = token.split(".")[1];
+      if (!base64Payload) return null;
+
+      const payload = JSON.parse(atob(base64Payload));
+      return payload.id || payload.userId || payload._id || payload.sub || null;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
+
+  // Use token user ID as fallback
+  const effectiveUserId = currentUserId || getUserFromToken();
+
+  // Handle both populated object and string ID for createdBy
+  const isProjectManager =
+    project && effectiveUserId
+      ? typeof project.createdBy === "object" && project.createdBy !== null
+        ? project.createdBy._id === effectiveUserId
+        : project.createdBy === effectiveUserId
+      : false;
 
   // Only project managers can search and invite members
   const searchUsers = async (query: string) => {
-    // Guard: Only managers can search
     if (!isProjectManager) {
-      console.warn("Only project managers can search for users");
       return;
     }
 
@@ -292,7 +337,6 @@ const ProjectBoard = () => {
 
   // Only project managers can invite members
   const inviteMember = async (userId: string) => {
-    // Guard: Only managers can invite
     if (!isProjectManager) {
       alert("Only project managers can invite members");
       return;
@@ -312,7 +356,6 @@ const ProjectBoard = () => {
 
   // Only project managers can remove members
   const removeMember = async (userId: string) => {
-    // Guard: Only managers can remove
     if (!isProjectManager) {
       alert("Only project managers can remove members");
       return;
@@ -326,6 +369,7 @@ const ProjectBoard = () => {
     }
   };
 
+  // All members can create tasks
   const createTask = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -339,6 +383,9 @@ const ProjectBoard = () => {
       if (newTask.assignedTo) {
         taskData.assignedTo = newTask.assignedTo;
       }
+      if (newTask.dueDate) {
+        taskData.dueDate = newTask.dueDate;
+      }
 
       const { data } = await api.post("/api/tasks", taskData);
       setTasks([...tasks, data.data]);
@@ -349,6 +396,7 @@ const ProjectBoard = () => {
         priority: "medium",
         status: "backlog",
         assignedTo: "",
+        dueDate: "",
       });
     } catch (error) {
       console.error("Failed to create task:", error);
@@ -452,15 +500,14 @@ const ProjectBoard = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {isProjectManager && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition"
-              >
-                <Plus className="w-4 h-4" />
-                Add Task
-              </button>
-            )}
+            {/* All members can add tasks */}
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition"
+            >
+              <Plus className="w-4 h-4" />
+              Add Task
+            </button>
             <button
               onClick={handleLogout}
               className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -499,10 +546,10 @@ const ProjectBoard = () => {
         </DndContext>
       </main>
 
-      {/* Create Task Modal - Only for Manager */}
-      {showCreateModal && isProjectManager && (
+      {/* Create Task Modal - Available to all members */}
+      {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Add Task</h2>
               <button
@@ -516,7 +563,7 @@ const ProjectBoard = () => {
             <form onSubmit={createTask} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title
+                  Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -532,7 +579,8 @@ const ProjectBoard = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
+                  Description{" "}
+                  <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <textarea
                   value={newTask.description}
@@ -541,30 +589,11 @@ const ProjectBoard = () => {
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                   rows={3}
+                  placeholder="Add a description..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Priority
-                  </label>
-                  <select
-                    value={newTask.priority}
-                    onChange={(e) =>
-                      setNewTask({
-                        ...newTask,
-                        priority: e.target.value as TaskPriority,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Status
@@ -585,11 +614,47 @@ const ProjectBoard = () => {
                     <option value="done">Done</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Priority
+                  </label>
+                  <select
+                    value={newTask.priority}
+                    onChange={(e) =>
+                      setNewTask({
+                        ...newTask,
+                        priority: e.target.value as TaskPriority,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Assign To
+                  Due Date{" "}
+                  <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="date"
+                  value={newTask.dueDate}
+                  onChange={(e) =>
+                    setNewTask({ ...newTask, dueDate: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Assign To{" "}
+                  <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <select
                   value={newTask.assignedTo}
@@ -602,7 +667,12 @@ const ProjectBoard = () => {
                   {project.members.map((member) => (
                     <option key={member._id} value={member._id}>
                       {member.name}{" "}
-                      {member._id === project.createdBy._id ? "(Manager)" : ""}
+                      {member._id ===
+                      (typeof project.createdBy === "object"
+                        ? project.createdBy._id
+                        : project.createdBy)
+                        ? "(Manager)"
+                        : ""}
                     </option>
                   ))}
                 </select>
@@ -628,10 +698,10 @@ const ProjectBoard = () => {
         </div>
       )}
 
-      {/* Members Modal */}
+      {/* Members Modal - Only Manager can invite */}
       {showMembersModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">
                 Project Members
@@ -645,10 +715,10 @@ const ProjectBoard = () => {
             </div>
 
             {/* Invite Member - Only for Manager */}
-            {isProjectManager && (
+            {isProjectManager ? (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Invite by Email
+                  Invite by Email or Name
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
@@ -700,6 +770,17 @@ const ProjectBoard = () => {
                 {isSearching && (
                   <p className="text-sm text-gray-500 mt-2">Searching...</p>
                 )}
+                {!isSearching &&
+                  searchQuery.length >= 2 &&
+                  searchResults.length === 0 && (
+                    <p className="text-sm text-gray-500 mt-2">No users found</p>
+                  )}
+              </div>
+            ) : (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  Only the project manager can invite new members.
+                </p>
               </div>
             )}
 
@@ -761,7 +842,10 @@ const ProjectBoard = () => {
                           <p className="font-medium text-gray-900">
                             {member.name}
                           </p>
-                          {member._id === project.createdBy._id && (
+                          {member._id ===
+                            (typeof project.createdBy === "object"
+                              ? project.createdBy._id
+                              : project.createdBy) && (
                             <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
                               Manager
                             </span>
@@ -771,7 +855,10 @@ const ProjectBoard = () => {
                       </div>
                     </div>
                     {isProjectManager &&
-                      member._id !== project.createdBy._id && (
+                      member._id !==
+                        (typeof project.createdBy === "object"
+                          ? project.createdBy._id
+                          : project.createdBy) && (
                         <button
                           onClick={() => removeMember(member._id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"

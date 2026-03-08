@@ -12,6 +12,7 @@ import {
   X,
   Save,
   AlertCircle,
+  LogOut,
 } from "lucide-react";
 import api from "../services/api";
 import type { Task, Project, TaskStatus, TaskPriority } from "../types";
@@ -85,8 +86,48 @@ const TaskDetail = () => {
     }
   };
 
-  const currentUserId = JSON.parse(localStorage.getItem("user") || "{}")._id;
-  const isProjectManager = project?.createdBy._id === currentUserId;
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  const getCurrentUserId = () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return null;
+
+      const base64Payload = token.split(".")[1];
+      if (!base64Payload) return null;
+
+      const payload = JSON.parse(atob(base64Payload));
+
+      return payload.id || payload._id || payload.userId || payload.sub || null;
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
+
+  const currentUserId = getCurrentUserId();
+
+  // Handle both populated object and string ID for createdBy
+  const isProjectManager =
+    project && currentUserId
+      ? typeof project.createdBy === "object" && project.createdBy !== null
+        ? project.createdBy._id === currentUserId
+        : project.createdBy === currentUserId
+      : false;
+
+  // Check if current user is a project member
+  const isProjectMember =
+    project && currentUserId
+      ? isProjectManager ||
+        project.members.some((m: any) => {
+          const memberId = typeof m === "object" ? m._id : m;
+          return memberId === currentUserId;
+        })
+      : false;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -181,8 +222,9 @@ const TaskDetail = () => {
             </div>
           </div>
 
-          {isProjectManager && !isEditing && (
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            {/* Edit button - visible to all project members */}
+            {!isEditing && isProjectMember && (
               <button
                 onClick={() => setIsEditing(true)}
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
@@ -190,6 +232,10 @@ const TaskDetail = () => {
               >
                 <Edit2 className="w-5 h-5" />
               </button>
+            )}
+
+            {/* Delete button - only for project managers */}
+            {!isEditing && isProjectManager && (
               <button
                 onClick={handleDelete}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
@@ -197,42 +243,50 @@ const TaskDetail = () => {
               >
                 <Trash2 className="w-5 h-5" />
               </button>
-            </div>
-          )}
+            )}
 
-          {isEditing && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  // Reset to original values
-                  setEditedTask({
-                    title: task.title,
-                    description: task.description,
-                    status: task.status,
-                    priority: task.priority,
-                    assignedTo:
-                      typeof task.assignedTo === "object" && task.assignedTo
-                        ? task.assignedTo._id
-                        : task.assignedTo,
-                    dueDate: task.dueDate
-                      ? new Date(task.dueDate).toISOString().split("T")[0]
-                      : undefined,
-                  });
-                }}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
-              >
-                <Save className="w-5 h-5" />
-              </button>
-            </div>
-          )}
+            {isEditing && (
+              <>
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditedTask({
+                      title: task.title,
+                      description: task.description,
+                      status: task.status,
+                      priority: task.priority,
+                      assignedTo:
+                        typeof task.assignedTo === "object" && task.assignedTo
+                          ? task.assignedTo._id
+                          : task.assignedTo,
+                      dueDate: task.dueDate
+                        ? new Date(task.dueDate).toISOString().split("T")[0]
+                        : undefined,
+                    });
+                  }}
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
+                >
+                  <Save className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Logout button */}
+            <button
+              onClick={handleLogout}
+              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition ml-2"
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -242,16 +296,52 @@ const TaskDetail = () => {
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[task.status]}`}
-                >
-                  {task.status.replace("-", " ")}
-                </span>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${priorityColors[task.priority]}`}
-                >
-                  {task.priority}
-                </span>
+                {isEditing ? (
+                  <select
+                    value={editedTask.status}
+                    onChange={(e) =>
+                      setEditedTask({
+                        ...editedTask,
+                        status: e.target.value as TaskStatus,
+                      })
+                    }
+                    className={`px-3 py-1 rounded-full text-sm font-medium border-0 outline-none cursor-pointer ${statusColors[editedTask.status || task.status]}`}
+                  >
+                    <option value="backlog">Backlog</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="review">Review</option>
+                    <option value="done">Done</option>
+                  </select>
+                ) : (
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${statusColors[task.status]}`}
+                  >
+                    {task.status.replace("-", " ")}
+                  </span>
+                )}
+
+                {isEditing ? (
+                  <select
+                    value={editedTask.priority}
+                    onChange={(e) =>
+                      setEditedTask({
+                        ...editedTask,
+                        priority: e.target.value as TaskPriority,
+                      })
+                    }
+                    className={`px-3 py-1 rounded-full text-sm font-medium border-0 outline-none cursor-pointer ${priorityColors[editedTask.priority || task.priority]}`}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                ) : (
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${priorityColors[task.priority]}`}
+                  >
+                    {task.priority}
+                  </span>
+                )}
               </div>
               <span className="text-sm text-gray-500">
                 Created {getTimeAgo(task.createdAt)}
@@ -359,7 +449,7 @@ const TaskDetail = () => {
                   <User className="w-4 h-4" />
                   Assigned To
                 </h3>
-                {isEditing && isProjectManager ? (
+                {isEditing ? (
                   <select
                     value={editedTask.assignedTo || ""}
                     onChange={(e) =>
@@ -371,10 +461,13 @@ const TaskDetail = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   >
                     <option value="">Unassigned</option>
-                    {project.members.map((member) => (
+                    {project.members.map((member: any) => (
                       <option key={member._id} value={member._id}>
                         {member.name}{" "}
-                        {member._id === project.createdBy._id
+                        {member._id ===
+                        (typeof project.createdBy === "object"
+                          ? project.createdBy._id
+                          : project.createdBy)
                           ? "(Manager)"
                           : ""}
                       </option>
@@ -444,52 +537,6 @@ const TaskDetail = () => {
                 )}
               </div>
 
-              {/* Status & Priority (Edit only) */}
-              {isEditing && (
-                <>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-3">
-                      Status
-                    </h3>
-                    <select
-                      value={editedTask.status}
-                      onChange={(e) =>
-                        setEditedTask({
-                          ...editedTask,
-                          status: e.target.value as TaskStatus,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    >
-                      <option value="backlog">Backlog</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="review">Review</option>
-                      <option value="done">Done</option>
-                    </select>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="text-sm font-medium text-gray-700 mb-3">
-                      Priority
-                    </h3>
-                    <select
-                      value={editedTask.priority}
-                      onChange={(e) =>
-                        setEditedTask({
-                          ...editedTask,
-                          priority: e.target.value as TaskPriority,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-                </>
-              )}
-
               {/* Task Info */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-gray-700 mb-3">
@@ -518,7 +565,7 @@ const TaskDetail = () => {
               </div>
 
               {/* Quick Actions */}
-              {!isEditing && isProjectManager && (
+              {!isEditing && isProjectMember && (
                 <div className="space-y-2">
                   <button
                     onClick={() => setIsEditing(true)}
@@ -527,13 +574,15 @@ const TaskDetail = () => {
                     <Edit2 className="w-4 h-4" />
                     Edit Task
                   </button>
-                  <button
-                    onClick={handleDelete}
-                    className="w-full py-2 px-4 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition flex items-center justify-center gap-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete Task
-                  </button>
+                  {isProjectManager && (
+                    <button
+                      onClick={handleDelete}
+                      className="w-full py-2 px-4 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition flex items-center justify-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete Task
+                    </button>
+                  )}
                 </div>
               )}
             </div>
