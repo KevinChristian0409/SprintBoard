@@ -1,12 +1,18 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './routes/ProtectedRoute';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Projects from './pages/Projects';
-import ProjectBoard from './pages/ProjectBoard';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
+import ProjectBoard from "./pages/ProjectBoard";
+import TaskDetail from "./pages/TaskDetail";
 
 function App() {
   return (
@@ -37,6 +43,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProjectBoard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects/:projectId/tasks/:taskId"
+            element={
+              <ProtectedRoute>
+                <TaskDetail />
               </ProtectedRoute>
             }
           />
