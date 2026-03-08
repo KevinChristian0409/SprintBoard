@@ -24,6 +24,13 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/projects", require("./routes/projectRoutes"));
+app.use("/api/tasks", require("./routes/taskRoutes"));
+
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "OK" });
+});
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
