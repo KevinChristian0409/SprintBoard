@@ -40,9 +40,9 @@ const Login = () => {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">T</span>
+              <span className="text-white font-bold text-xl">S</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">TaskFlow</span>
+            <span className="text-2xl font-bold text-gray-900">SprintBoard</span>
           </div>
 
           <div>
