@@ -292,10 +292,14 @@ const Projects = () => {
 
             <form onSubmit={createProject} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="project-name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Project Name
                 </label>
                 <input
+                  id="project-name"
                   type="text"
                   value={newProject.name}
                   onChange={(e) =>
@@ -308,10 +312,15 @@ const Projects = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="project-description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Description
                 </label>
+
                 <textarea
+                  id="project-description"
                   value={newProject.description}
                   onChange={(e) =>
                     setNewProject({
