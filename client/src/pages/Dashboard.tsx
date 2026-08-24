@@ -89,8 +89,9 @@ const Dashboard = () => {
             </Link>
             <button
               onClick={handleLogout}
-              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+              aria-label="Logout"
               title="Logout"
+              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
             >
               <LogOut className="w-5 h-5" />
             </button>

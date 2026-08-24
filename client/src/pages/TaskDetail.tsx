@@ -207,6 +207,7 @@ const TaskDetail = () => {
           <div className="flex items-center gap-4">
             <Link
               to={`/projects/${projectId}`}
+              aria-label="Back to project board"
               className="p-2 hover:bg-gray-100 rounded-lg transition"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -227,8 +228,9 @@ const TaskDetail = () => {
             {!isEditing && isProjectMember && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                aria-label="Edit task"
                 title="Edit task"
+                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
               >
                 <Edit2 className="w-5 h-5" />
               </button>
@@ -238,8 +240,9 @@ const TaskDetail = () => {
             {!isEditing && isProjectManager && (
               <button
                 onClick={handleDelete}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                aria-label="Delete task"
                 title="Delete task"
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
               >
                 <Trash2 className="w-5 h-5" />
               </button>
@@ -248,6 +251,8 @@ const TaskDetail = () => {
             {isEditing && (
               <>
                 <button
+                  type="button"
+                  aria-label="Cancel editing"
                   onClick={() => {
                     setIsEditing(false);
                     setEditedTask({
@@ -269,6 +274,8 @@ const TaskDetail = () => {
                   <X className="w-5 h-5" />
                 </button>
                 <button
+                  type="button"
+                  aria-label="Save task"
                   onClick={handleSave}
                   disabled={isSaving}
                   className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
@@ -281,8 +288,9 @@ const TaskDetail = () => {
             {/* Logout button */}
             <button
               onClick={handleLogout}
-              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition ml-2"
+              aria-label="Logout"
               title="Logout"
+              className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition ml-2"
             >
               <LogOut className="w-5 h-5" />
             </button>
@@ -298,6 +306,8 @@ const TaskDetail = () => {
               <div className="flex items-center gap-3">
                 {isEditing ? (
                   <select
+                    id="task-detail-status"
+                    aria-label="Task status"
                     value={editedTask.status}
                     onChange={(e) =>
                       setEditedTask({
@@ -322,6 +332,8 @@ const TaskDetail = () => {
 
                 {isEditing ? (
                   <select
+                    id="task-detail-priority"
+                    aria-label="Task priority"
                     value={editedTask.priority}
                     onChange={(e) =>
                       setEditedTask({
@@ -350,6 +362,8 @@ const TaskDetail = () => {
 
             {isEditing ? (
               <input
+                id="task-detail-title"
+                aria-label="Task title"
                 type="text"
                 value={editedTask.title || ""}
                 onChange={(e) =>
@@ -375,6 +389,8 @@ const TaskDetail = () => {
                 </h3>
                 {isEditing ? (
                   <textarea
+                    id="task-detail-description"
+                    aria-label="Task description"
                     value={editedTask.description || ""}
                     onChange={(e) =>
                       setEditedTask({
@@ -451,6 +467,8 @@ const TaskDetail = () => {
                 </h3>
                 {isEditing ? (
                   <select
+                    id="task-detail-assignee"
+                    aria-label="Assigned to"
                     value={editedTask.assignedTo || ""}
                     onChange={(e) =>
                       setEditedTask({
@@ -509,6 +527,8 @@ const TaskDetail = () => {
                 </h3>
                 {isEditing ? (
                   <input
+                    id="task-detail-due-date"
+                    aria-label="Due date"
                     type="date"
                     value={editedTask.dueDate || ""}
                     onChange={(e) =>

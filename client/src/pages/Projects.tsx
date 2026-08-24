@@ -130,6 +130,7 @@ const Projects = () => {
             </Link>
             <button
               onClick={handleLogout}
+              aria-label="Logout"
               className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
               title="Logout"
             >
@@ -231,6 +232,7 @@ const Projects = () => {
                       {isManager && (
                         <button
                           onClick={() => deleteProject(project._id)}
+                          aria-label={`Delete project ${project.name}`}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
                         >
                           <Trash2 className="w-4 h-4" />

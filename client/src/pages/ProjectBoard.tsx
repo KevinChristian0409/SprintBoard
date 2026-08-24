@@ -91,6 +91,7 @@ const TaskCard = ({
         <div className="flex items-center gap-2 flex-1">
           <button
             {...listeners}
+            aria-label={`Drag task ${task.title}`}
             className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition"
           >
             <GripVertical className="w-4 h-4 text-gray-400" />
@@ -469,6 +470,7 @@ const ProjectBoard = () => {
           <div className="flex items-center gap-4">
             <Link
               to="/projects"
+              aria-label="Back to projects"
               className="p-2 hover:bg-gray-100 rounded-lg transition"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -491,6 +493,7 @@ const ProjectBoard = () => {
                 </div>
                 <button
                   onClick={() => setShowMembersModal(true)}
+                  aria-label="View project members"
                   className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
                 >
                   <Users className="w-3 h-3" />
@@ -510,6 +513,7 @@ const ProjectBoard = () => {
             </button>
             <button
               onClick={handleLogout}
+              aria-label="Logout"
               className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
               title="Logout"
             >
@@ -554,6 +558,7 @@ const ProjectBoard = () => {
               <h2 className="text-xl font-bold text-gray-900">Add Task</h2>
               <button
                 onClick={() => setShowCreateModal(false)}
+                aria-label="Close create task dialog"
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
               >
                 <X className="w-5 h-5" />
@@ -562,11 +567,15 @@ const ProjectBoard = () => {
 
             <form onSubmit={createTask} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="task-title"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
+                  id="task-title"
                   value={newTask.title}
                   onChange={(e) =>
                     setNewTask({ ...newTask, title: e.target.value })
@@ -578,11 +587,15 @@ const ProjectBoard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="task-description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Description{" "}
                   <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <textarea
+                  id="task-description"
                   value={newTask.description}
                   onChange={(e) =>
                     setNewTask({ ...newTask, description: e.target.value })
@@ -595,10 +608,14 @@ const ProjectBoard = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="task-status"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Status
                   </label>
                   <select
+                    id="task-status"
                     value={newTask.status}
                     onChange={(e) =>
                       setNewTask({
@@ -616,10 +633,14 @@ const ProjectBoard = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="task-priority"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Priority
                   </label>
                   <select
+                    id="task-priority"
                     value={newTask.priority}
                     onChange={(e) =>
                       setNewTask({
@@ -637,12 +658,16 @@ const ProjectBoard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="task-due-date"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Due Date{" "}
                   <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
                 <input
                   type="date"
+                  id="task-due-date"
                   value={newTask.dueDate}
                   onChange={(e) =>
                     setNewTask({ ...newTask, dueDate: e.target.value })
@@ -652,11 +677,16 @@ const ProjectBoard = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="task-assignee"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Assign To{" "}
                   <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
+
                 <select
+                  id="task-assignee"
                   value={newTask.assignedTo}
                   onChange={(e) =>
                     setNewTask({ ...newTask, assignedTo: e.target.value })
@@ -708,6 +738,7 @@ const ProjectBoard = () => {
               </h2>
               <button
                 onClick={() => setShowMembersModal(false)}
+                aria-label="Close project members dialog"
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
               >
                 <X className="w-5 h-5" />
@@ -717,13 +748,17 @@ const ProjectBoard = () => {
             {/* Invite Member - Only for Manager */}
             {isProjectManager ? (
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="member-search"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Invite by Email or Name
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                   <input
                     type="text"
+                    id="member-search"
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -861,6 +896,7 @@ const ProjectBoard = () => {
                           : project.createdBy) && (
                         <button
                           onClick={() => removeMember(member._id)}
+                          aria-label={`Remove member ${member.name}`}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
                         >
                           <Trash2 className="w-4 h-4" />
