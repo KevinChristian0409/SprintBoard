@@ -1,5 +1,7 @@
 # SprintBoard
 
+![Playwright Tests](https://github.com/KevinChristian0409/SprintBoard/actions/workflows/playwright.yml/badge.svg)
+
 **SprintBoard** is a full-stack project management application inspired by Jira-style workflows and Kanban boards. It allows users to create and manage projects, organize tasks through a visual workflow, collaborate with project members, and track work from a centralized dashboard.
 
 > **Mini Jira-style project management application built with React, TypeScript, Node.js, Express, and MongoDB.**
@@ -54,7 +56,7 @@ The application is deployed with:
 - Task due dates
 - Task tags
 - Task ordering
-- Drag-and-drop task organization
+- Drag-and-drop Kanban workflow
 
 ### 🔄 Kanban Workflow
 
@@ -89,46 +91,6 @@ The dashboard provides an overview of:
 
 ---
 
-## 🖥️ Screenshots
-
-### Login
-
-Users can securely register and sign in to their SprintBoard account.
-
-![SprintBoard Login](docs/screenshots/login.png)
-
-### Dashboard
-
-The dashboard provides a quick overview of projects and task activity.
-
-![SprintBoard Dashboard](docs/screenshots/dashboard.png)
-
-### Projects
-
-The projects page allows users to create projects, view existing projects, and manage pending invitations.
-
-![SprintBoard Projects](docs/screenshots/projects.png)
-
-### Kanban Board
-
-The project board provides a visual workflow for organizing tasks across different stages.
-
-![SprintBoard Kanban Board](docs/screenshots/kanban-board.png)
-
-### Task Details
-
-The task detail page displays information such as the task description, status, priority, assignee, due date, and tags.
-
-![SprintBoard Task Details](docs/screenshots/task-details.png)
-
-### Team Collaboration
-
-Project members and invitations can be managed through the project collaboration features.
-
-![SprintBoard Team Collaboration](docs/screenshots/project-members.png)
-
----
-
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -154,6 +116,15 @@ Project members and invitations can be managed through the project collaboration
 - CORS
 - dotenv
 
+### Testing
+
+- Playwright
+- TypeScript
+- Page Object Model
+- Playwright Fixtures
+- UI and API Automation
+- GitHub Actions
+
 ### Deployment & Development
 
 - Git
@@ -161,6 +132,43 @@ Project members and invitations can be managed through the project collaboration
 - Vercel
 - Render
 - MongoDB Atlas
+
+---
+
+## 🧪 Automated Testing
+
+SprintBoard includes a dedicated Playwright test suite covering both the frontend and backend.
+
+**[View the complete testing documentation](tests/README.md)**
+
+### Test Strategy
+
+The suite separates responsibilities so each test stays focused:
+
+- **UI tests** validate real user workflows through the browser.
+- **API tests** validate backend contracts, status codes, authorization, and CRUD behavior.
+- **Fixtures** create isolated projects/tasks and clean them up after tests.
+- **Authentication setup** creates one reusable authenticated browser state for protected UI tests.
+- **Page Objects** keep selectors and common interactions out of the test cases.
+
+### Coverage
+
+The suite covers:
+
+- Login and registration validation
+- Authentication state and protected routes
+- Project creation and navigation
+- Project modal behavior
+- Task creation with different values
+- Task editing and cancellation
+- Task deletion and confirmation dialogs
+- Project member dialog and search
+- API authentication
+- API authorization
+- Project CRUD
+- Task CRUD
+- Task status updates
+- User search API
 
 ---
 
@@ -175,7 +183,7 @@ SprintBoard uses a client-server architecture where the React frontend communica
                                     │
                                     ▼
                          ┌──────────────────────┐
-                         │   React + TypeScript │
+                         │  React + TypeScript  │
                          │        Vite          │
                          │                      │
                          │ React Router         │
@@ -184,7 +192,7 @@ SprintBoard uses a client-server architecture where the React frontend communica
                          │ dnd-kit              │
                          └──────────┬───────────┘
                                     │
-                                REST API
+                               REST API
                                     │
                                     ▼
                          ┌──────────────────────┐
@@ -213,17 +221,17 @@ SprintBoard uses a client-server architecture where the React frontend communica
 
 ```text
                  Vercel
-            React Frontend
-                  │
-                  │ HTTPS / REST API
-                  ▼
-                Render
-          Node.js + Express API
-                  │
-                  │ Mongoose
-                  ▼
-            MongoDB Atlas
-               Database
+             React Frontend
+                    │
+                    │ HTTPS / REST API
+                    ▼
+                 Render
+           Node.js + Express API
+                    │
+                    │ Mongoose
+                    ▼
+             MongoDB Atlas
+                Database
 ```
 
 ---
@@ -269,6 +277,14 @@ SprintBoard/
 │   ├── .env.example
 │   ├── package.json
 │   └── server.js
+│
+├── tests/
+│   ├── e2e/
+│   ├── fixtures/
+│   ├── pages/
+│   ├── auth.setup.ts
+│   ├── playwright.config.ts
+│   └── README.md
 │
 ├── .gitignore
 ├── package.json
@@ -408,8 +424,8 @@ The Task model contains:
 
 Before running SprintBoard locally, make sure you have:
 
-- [Node.js](https://nodejs.org/)
-- [Git](https://git-scm.com/)
+- Node.js
+- Git
 - A MongoDB database, such as MongoDB Atlas
 
 ### 1. Clone the Repository
@@ -437,15 +453,7 @@ npm install
 
 ### 4. Configure the Backend
 
-Create a `.env` file inside the `server` directory:
-
-```text
-server/
-├── .env
-├── .env.example
-├── server.js
-└── ...
-```
+Create a `.env` file inside the `server` directory.
 
 Add:
 
@@ -457,10 +465,10 @@ CLIENT_URL=http://localhost:5173
 
 ### Environment Variables
 
-| Variable | Purpose |
-|---|---|
-| `MONGO_URI` | MongoDB connection string |
-| `JWT_SECRET` | Secret used to sign and verify JWT tokens |
+| Variable     | Purpose                                                |
+| ------------ | ------------------------------------------------------ |
+| `MONGO_URI`  | MongoDB connection string                              |
+| `JWT_SECRET` | Secret used to sign and verify JWT tokens              |
 | `CLIENT_URL` | Frontend URL allowed by the backend CORS configuration |
 
 The repository includes `server/.env.example` as a template.
@@ -503,8 +511,6 @@ Create a `.env` file inside the `client` directory:
 VITE_API_URL=http://localhost:5000
 ```
 
-The frontend uses `VITE_API_URL` to determine the backend API URL.
-
 ### 7. Start the Frontend
 
 From the `client` directory:
@@ -518,8 +524,6 @@ The frontend runs locally on:
 ```text
 http://localhost:5173
 ```
-
-Open the address in your browser to start using SprintBoard.
 
 ---
 
@@ -535,27 +539,9 @@ The React/Vite frontend is deployed on Vercel.
 
 https://sprint-board-seven-omega.vercel.app
 
-The production frontend uses:
-
-```env
-VITE_API_URL=https://sprintboard-api-4qps.onrender.com
-```
-
-The project includes `client/vercel.json` to support client-side React Router routes when users directly visit or refresh routes such as `/login`, `/dashboard`, and `/projects`.
-
 ### Backend — Render
 
 The Node.js/Express backend is deployed on Render.
-
-The production backend uses:
-
-```text
-MONGO_URI
-JWT_SECRET
-CLIENT_URL
-```
-
-The production `CLIENT_URL` points to the deployed Vercel frontend.
 
 ### Database — MongoDB Atlas
 
@@ -615,26 +601,33 @@ cd server
 node server.js
 ```
 
+### Run Automated Tests
+
+```bash
+cd tests
+npm test
+```
+
+See [`tests/README.md`](tests/README.md) for the complete Playwright test commands and framework details.
+
 ---
 
-## 📈 Future Improvements
+## 🤖 Continuous Integration
 
-Potential future improvements include:
+GitHub Actions runs the Playwright automation suite automatically.
 
-- Password reset and account recovery
-- Email verification
-- Automated frontend and API testing
-- Improved notification functionality
-- Advanced task filtering and sorting
-- Project analytics and reporting
-- Enhanced error handling
-- Production monitoring and logging
+The workflow:
+
+- Installs dependencies
+- Installs Playwright browsers
+- Runs the automated test suite
+- Reports test failures through the GitHub Actions workflow
+
+Sensitive test credentials are provided through GitHub Actions secrets rather than stored in the repository.
 
 ---
 
 ## 🎯 What This Project Demonstrates
-
-SprintBoard demonstrates practical full-stack development skills, including:
 
 - React and TypeScript development
 - REST API development
@@ -649,10 +642,15 @@ SprintBoard demonstrates practical full-stack development skills, including:
 - Drag-and-drop interfaces
 - Team collaboration features
 - API integration with Axios
-- Environment-based configuration
+- Playwright UI and API automation
+- Page Object Model
+- Playwright fixtures
+- Reusable authentication state
+- API-based test data setup
+- Test isolation and cleanup
 - Git and GitHub workflows
+- GitHub Actions
 - Cloud deployment
-- Frontend and backend integration
 
 ---
 
