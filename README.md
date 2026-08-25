@@ -151,6 +151,26 @@ The suite separates responsibilities so each test stays focused:
 - **Authentication setup** creates one reusable authenticated browser state for protected UI tests.
 - **Page Objects** keep selectors and common interactions out of the test cases.
 
+### Cross-Browser Coverage
+
+The Playwright suite validates critical workflows across three browser engines:
+
+- **Chromium** runs the primary UI regression suite.
+- **Firefox** runs public and authenticated critical workflows.
+- **WebKit** provides Safari-engine coverage for public and authenticated critical workflows.
+- **API tests** run independently from browser automation.
+
+| Test Area                     | Chromium | Firefox | WebKit |
+| ----------------------------- | :------: | :-----: | :----: |
+| Authentication & Registration |   Yes    |   Yes   |  Yes   |
+| Smoke Testing                 |   Yes    |   Yes   |  Yes   |
+| Unauthenticated Access        |   Yes    |   Yes   |  Yes   |
+| Project Workflows             |   Yes    |   Yes   |  Yes   |
+| Task Workflows                |   Yes    |   Yes   |  Yes   |
+| Protected Routes              |   Yes    |   Yes   |  Yes   |
+
+Chromium receives the full regression suite, while Firefox and WebKit provide targeted cross-browser coverage of the application's highest-value workflows.
+
 ### Coverage
 
 The suite covers:
