@@ -4,16 +4,17 @@ import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 
 export default defineConfig({
-  testDir: ".",
+  testDir: "./e2e",
+
   fullyParallel: true,
+
   forbidOnly: !!process.env.CI,
+
   retries: process.env.CI ? 2 : 0,
+
   workers: process.env.CI ? 1 : undefined,
 
-  reporter: [
-    ["html", { open: "never" }],
-    ["list"],
-  ],
+  reporter: [["html", { open: "never" }], ["list"]],
 
   use: {
     baseURL:
@@ -28,27 +29,95 @@ export default defineConfig({
   projects: [
     {
       name: "setup",
-      testMatch: /auth\.setup\.ts/,
+      testMatch: /.*\.setup\.ts/,
     },
+
     {
       name: "chromium",
-      testMatch: /e2e\/(auth|smoke|unauthenticated)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
       },
+      testMatch: [
+        /auth\.spec\.ts/,
+        /smoke\.spec\.ts/,
+        /unauthenticated\.spec\.ts/,
+      ],
     },
+
     {
       name: "chromium-auth",
       dependencies: ["setup"],
-      testMatch: /e2e\/(protected|projects|tasks)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         storageState: "playwright/.auth/user.json",
       },
+      testMatch: [
+        /projects\.spec\.ts/,
+        /tasks\.spec\.ts/,
+        /protected\.spec\.ts/,
+      ],
     },
+
+    {
+      name: "firefox",
+      use: {
+        ...devices["Desktop Firefox"],
+      },
+      testMatch: [
+        /auth\.spec\.ts/,
+        /smoke\.spec\.ts/,
+        /unauthenticated\.spec\.ts/,
+      ],
+    },
+
+    {
+      name: "firefox-auth",
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Firefox"],
+        storageState: "playwright/.auth/user.json",
+      },
+      testMatch: [
+        /projects\.spec\.ts/,
+        /tasks\.spec\.ts/,
+        /protected\.spec\.ts/,
+      ],
+    },
+
+    {
+      name: "webkit",
+      use: {
+        ...devices["Desktop Safari"],
+      },
+      testMatch: [
+        /auth\.spec\.ts/,
+        /smoke\.spec\.ts/,
+        /unauthenticated\.spec\.ts/,
+      ],
+    },
+
+    {
+      name: "webkit-auth",
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Safari"],
+        storageState: "playwright/.auth/user.json",
+      },
+      testMatch: [
+        /projects\.spec\.ts/,
+        /tasks\.spec\.ts/,
+        /protected\.spec\.ts/,
+      ],
+    },
+
     {
       name: "api",
-      testMatch: /e2e\/api\.spec\.ts/,
+      testMatch: /.*api.*\.spec\.ts/,
+      use: {
+        baseURL:
+          process.env.PLAYWRIGHT_TEST_API_URL ||
+          "https://sprintboard-api-4qps.onrender.com",
+      },
     },
   ],
 });
