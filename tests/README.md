@@ -108,6 +108,51 @@ This keeps the login workflow covered by its own tests while avoiding repeated l
 
 ---
 
+## Cross-Browser Coverage
+
+The suite uses Playwright projects to validate critical workflows across Chromium, Firefox, and WebKit.
+
+### `chromium`
+
+Runs the primary public UI regression suite.
+
+### `chromium-auth`
+
+Runs the full authenticated UI regression suite using the saved authentication state.
+
+### `firefox`
+
+Runs public authentication, registration, smoke, and unauthenticated workflows to identify browser-specific issues.
+
+### `firefox-auth`
+
+Runs authenticated project, task, and protected-route workflows using the saved authentication state.
+
+### `webkit`
+
+Runs the same critical public workflows against the WebKit browser engine for Safari-engine coverage.
+
+### `webkit-auth`
+
+Runs authenticated project, task, and protected-route workflows against WebKit.
+
+### Browser Coverage Matrix
+
+| Test Area                     | Chromium | Firefox | WebKit |
+| ----------------------------- | :------: | :-----: | :----: |
+| Authentication & Registration |   Yes    |   Yes   |  Yes   |
+| Smoke Testing                 |   Yes    |   Yes   |  Yes   |
+| Unauthenticated Access        |   Yes    |   Yes   |  Yes   |
+| Project Workflows             |   Yes    |   Yes   |  Yes   |
+| Task Workflows                |   Yes    |   Yes   |  Yes   |
+| Protected Routes              |   Yes    |   Yes   |  Yes   |
+
+Chromium receives the full regression suite, while Firefox and WebKit provide targeted cross-browser coverage of the application's highest-value workflows.
+
+### `api`
+
+Runs REST API tests independently from browser automation.
+
 ## Test Projects
 
 The Playwright configuration separates the suite into different projects:
@@ -123,6 +168,22 @@ Runs public UI tests that do not require an authenticated session.
 ### `chromium-auth`
 
 Runs protected UI tests using the saved authentication state.
+
+### `firefox`
+
+Runs critical public workflows for cross-browser coverage.
+
+### `firefox-auth`
+
+Runs critical authenticated workflows for cross-browser coverage.
+
+### `webkit`
+
+Runs critical public workflows against the WebKit browser engine.
+
+### `webkit-auth`
+
+Runs critical authenticated workflows against the WebKit browser engine.
 
 ### `api`
 
@@ -193,6 +254,30 @@ Run these commands from the `tests` directory.
 
 ```bash
 npm test
+```
+
+### Run Chromium
+
+```bash
+npx playwright test --project=chromium
+```
+
+### Run Firefox
+
+```bash
+npx playwright test --project=firefox
+```
+
+### Run WebKit
+
+```bash
+npx playwright test --project=webkit
+```
+
+### Run authenticated cross-browser tests
+
+```bash
+npx playwright test --project=chromium-auth --project=firefox-auth --project=webkit-auth
 ```
 
 ### Run UI tests
