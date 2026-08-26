@@ -18,6 +18,46 @@ The application is deployed with:
 
 ---
 
+## 🖥️ Screenshots
+
+### Login
+
+Users can securely register and sign in to their SprintBoard account.
+
+![SprintBoard Login](docs/screenshots/login.png)
+
+### Dashboard
+
+The dashboard provides a quick overview of projects and task activity.
+
+![SprintBoard Dashboard](docs/screenshots/dashboard.png)
+
+### Projects
+
+The projects page allows users to create projects, view existing projects, and manage pending invitations.
+
+![SprintBoard Projects](docs/screenshots/projects.png)
+
+### Kanban Board
+
+The project board provides a visual workflow for organizing tasks across different stages.
+
+![SprintBoard Kanban Board](docs/screenshots/kanban-board.png)
+
+### Task Details
+
+The task detail page displays information such as the task description, status, priority, assignee, due date, and tags.
+
+![SprintBoard Task Details](docs/screenshots/task-details.png)
+
+### Team Collaboration
+
+Project members and invitations can be managed through the project collaboration features.
+
+![SprintBoard Team Collaboration](docs/screenshots/project-members.png)
+
+---
+
 ## ✨ Features
 
 ### 🔐 Authentication
